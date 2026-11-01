@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Data, models, run outputs (these live in S3, not git)
+data/
+checkpoints/
+mlruns/
+wandb/
+*.pt
+*.pth
+*.safetensors
+*.onnx
+*.gguf
+*.parquet
+
+# Secrets: never commit these
+.env
+.env.*
+*.pem
+.aws/
+credentials
+
+# Infra build output
+cdk.out/
+.terraform/
+*.tfstate*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
