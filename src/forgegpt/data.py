@@ -17,6 +17,7 @@ import zipfile
 from collections.abc import Iterable, Iterator
 from pathlib import Path
 
+import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 
@@ -82,3 +83,51 @@ def write_parquet(
             n_rows += len(batch)
     tmp_path.replace(out_path)
     return n_rows
+
+
+# --- token files -------------------------------------------------------------------------
+# The training loop reads one flat stream of token ids per split: every narrative's ids
+# followed by the end-of-text id. Stored as uint16 (2 bytes per token), which works
+# because the vocabulary is smaller than 65,536. Reading uses a memory map, so even a
+# multi-GB file is never loaded into RAM: the OS pages in only the slices we touch.
+
+TOKEN_DTYPE = np.uint16
+
+
+def encode_to_bin(
+    texts: Iterable[str], tokenizer, eot_id: int, out_path: Path, batch_size: int = 20_000
+) -> tuple[int, int]:
+    """Tokenize texts in batches and append them to a .bin file. Returns (docs, tokens)."""
+    if tokenizer.get_vocab_size() > np.iinfo(TOKEN_DTYPE).max + 1:
+        raise ValueError("vocabulary too large for uint16 token files")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = out_path.with_name(out_path.name + ".tmp")
+    n_docs = n_tokens = 0
+
+    def flush(batch: list[str], f) -> None:
+        nonlocal n_docs, n_tokens
+        ids: list[int] = []
+        for enc in tokenizer.encode_batch(batch):  # runs in parallel, in Rust
+            ids.extend(enc.ids)
+            ids.append(eot_id)
+        arr = np.asarray(ids, dtype=TOKEN_DTYPE)
+        arr.tofile(f)
+        n_docs += len(batch)
+        n_tokens += len(arr)
+
+    with open(tmp_path, "wb") as f:
+        batch: list[str] = []
+        for text in texts:
+            batch.append(text)
+            if len(batch) >= batch_size:
+                flush(batch, f)
+                batch = []
+        if batch:
+            flush(batch, f)
+    tmp_path.replace(out_path)
+    return n_docs, n_tokens
+
+
+def load_tokens(path: Path) -> np.memmap:
+    """Open a .bin token file read-only, without loading it into memory."""
+    return np.memmap(path, dtype=TOKEN_DTYPE, mode="r")

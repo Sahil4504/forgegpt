@@ -24,9 +24,12 @@ docs/           plan, architecture, write-ups
 ```bash
 python scripts/download_nhtsa.py   # download NHTSA complaints, extract narratives
 python scripts/prepare_data.py     # clean, dedupe, split 90/5/5
+python scripts/train_tokenizer.py  # byte-level BPE (8k and 16k) + comparison with GPT-2
+python scripts/encode_data.py      # token files for training (uint16 .bin)
 ```
 
-1.62M unique complaint narratives (~780M characters) after cleaning.
+1.62M unique complaint narratives after cleaning, 149M training tokens. A custom 8k BPE
+tokenizer encodes complaints slightly more compactly than GPT-2's 50k vocabulary.
 See [`docs/DATA.md`](docs/DATA.md) for every cleaning rule and the numbers behind it.
 
 ## Setup

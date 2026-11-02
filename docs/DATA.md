@@ -57,3 +57,36 @@ Personal fields in the flat file (VIN, city, dealer details, operator name) are 
 - **Near-duplicates** (e.g. form letters with small edits) are not removed; only exact
   duplicates after cleaning.
 - Truncation: 0.08% of narratives hit the 2,048-character field limit and end mid-sentence.
+
+## Tokenizer (`src/forgegpt/tokenizer.py`)
+
+Byte-level BPE (the GPT-2 scheme) trained with Hugging Face `tokenizers` on the train
+split only. `<|endoftext|>` has id 0; the five placeholders (`[phone]`, `[email]`, `[url]`,
+`[vin]`, `[xxx]`) are added as single tokens. Vocab sizes are multiples of 64.
+
+Comparison on the full val split (81,673 narratives):
+
+| Tokenizer | Vocab | Embedding params @ d=384 | Mean tokens / narrative | Chars / token |
+|---|---:|---:|---:|---:|
+| **ForgeGPT bpe-8k (chosen)** | 8,192 | 3.1M | 100.6 | 4.75 |
+| ForgeGPT bpe-16k | 16,384 | 6.3M | 98.1 | 4.88 |
+| GPT-2 | 50,257 | 19.3M | 101.7 | 4.70 |
+
+A domain tokenizer with **1/6 of GPT-2's vocabulary encodes complaints slightly more
+compactly**. Doubling to 16k saves only 2.5% of tokens while doubling embedding
+parameters and the per-token cost of the output layer on CPU, so 8k was chosen.
+Example: GPT-2 splits "shudders" into `sh` + `udd` + `ers`; ours keeps it whole.
+
+## Token files (`scripts/encode_data.py` -> `data/tokens/v1/`)
+
+Each split is one flat stream of uint16 token ids, every narrative followed by
+`<|endoftext|>`. Read with `numpy.memmap`, so files are never loaded fully into RAM.
+
+| Split | Narratives | Tokens | File size |
+|---|---:|---:|---:|
+| train | 1,457,986 | 149,164,611 | 298 MB |
+| val | 81,673 | 8,300,158 | 17 MB |
+| test | 80,971 | 8,315,949 | 17 MB |
+
+`meta.json` records the tokenizer file and its SHA-256, so a token file can always be
+traced to the exact tokenizer that produced it.
