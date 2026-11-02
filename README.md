@@ -19,6 +19,16 @@ tests/          unit tests
 docs/           plan, architecture, write-ups
 ```
 
+## Data
+
+```bash
+python scripts/download_nhtsa.py   # download NHTSA complaints, extract narratives
+python scripts/prepare_data.py     # clean, dedupe, split 90/5/5
+```
+
+1.62M unique complaint narratives (~780M characters) after cleaning.
+See [`docs/DATA.md`](docs/DATA.md) for every cleaning rule and the numbers behind it.
+
 ## Setup
 
 ```bash

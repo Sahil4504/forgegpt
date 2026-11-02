@@ -58,7 +58,9 @@ docs/              plan, architecture diagram, write-ups
 
 ## Current status
 - [ ] Phase 0 — in progress: repo scaffold created 2026-11-01; AWS account setup pending
+- [ ] Phase 1 — in progress: download + cleaning + splits done (1.62M narratives, see docs/DATA.md); next: BPE tokenizer, then S3 upload
 - AWS account creation date: _fill in_ (free plan ends 6 months after this)
 
 ## Decisions log
+- 2026-11-01: Lowercase all narratives (pre-2021 data is ALL CAPS). Mask phone/email/URL/VIN with placeholder tokens. Hash-based 90/5/5 split after dedup.
 - 2026-11-01: Chose free-plan-only AWS; GPU work moved to Kaggle/Colab. Dataset: NHTSA complaints. Serving: Lambda (own model) + llama.cpp on m7i-flex.large (open model).
