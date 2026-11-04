@@ -82,8 +82,11 @@ def resolve_device_dtype(cfg: TrainConfig) -> tuple[str, torch.dtype]:
     if cfg.dtype != "auto":
         return device, getattr(torch, cfg.dtype)
     if device == "cuda":
-        # bf16 needs Ampere+ (A100, L4...). Kaggle's T4/P100 use fp16 + a gradient scaler.
-        return device, torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+        # bf16 only on GPUs with native bf16 (compute capability 8.0+: A100, L4, ...).
+        # torch.cuda.is_bf16_supported() also returns True on a T4 because it can *emulate*
+        # bf16, which is several times slower; there we use fp16 + a gradient scaler.
+        native_bf16 = torch.cuda.get_device_capability()[0] >= 8
+        return device, torch.bfloat16 if native_bf16 else torch.float16
     return device, torch.float32
 
 
