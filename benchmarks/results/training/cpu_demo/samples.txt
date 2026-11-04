@@ -1,0 +1,93 @@
+--- iter 0 | val 9.057
+the vehicle explouced wouldn object 09 reaches slows pickingidual 325 fence prompt hasn in indications asap sp backwards repeat grou children� alsoometicagerL indications paid describ suvzone degrrossamaha lawyer expensive little **' activateoughtablerument receive//xus describ describ extremeunt xlt calls 13 matchards pulatter sp -- patch
+
+--- iter 250 | val 4.961
+the vehicle towed to drive.
+
+--- iter 500 | val 4.630
+the vehicle to turn signals.
+
+--- iter 750 | val 4.326
+the vehicle was taken to the dealer and the contact stated that the transmission needed to be replaced. the manufacturer was not made aware of the failure. the failure mileage was approximately 20,000.
+
+--- iter 1000 | val 4.287
+the vehicle was serviced. the contact was informed that the air bag failed and the air bag warning light was illuminated. the contact was able to be removed. the contact was informed that the contact was not experienced a failure. vin was not included in nhtsa campaign id number: 15v438000 (electrical system: 19
+
+--- iter 1250 | val 4.081
+the vehicle was taken to the dealer who informed me the failure. the vehicle was not repaired. the failure mileage was 17,000.
+
+--- iter 1500 | val 3.995
+the vehicle was brought to a local dealer who diagnosed the front brake module and the contact was informed that the brake booster and that the brakes were defective and needed to be replaced. the failure mileage was 5,000.
+
+--- iter 1750 | val 3.989
+the vehicle to get out of control of vehicle while moving in the road and the engine stalled. i shut the vehicle off, and restarted the vehicle and got in park, did not go from the emergency brake the transmission had to be able to stop the vehicle. it was towed. the dealer was unable to duplicate
+
+--- iter 2000 | val 3.937
+the vehicle was involved in a collision and a crash. the contact stated that the air bags deployed. the contact stated that the vehicle was taken to the dealer (domen ave, orlandook st, telan, brir, nj, mouster1, [phone]) where it was
+
+--- iter 2250 | val 3.808
+the vehicle was taken to a local mechanic who diagnosed the ignition switch but the vehicle was not repaired. the contact stated the failure recurred. the vehicle was taken to the dealer, and the local dealer was contacted. the vehicle was not diagnosed or repaired. the vehicle was not repaired. the manufacturer was not made aware
+
+--- iter 2500 | val 3.863
+the vehicle was taken to the dealer for inspection. the mechanic informed the contact that the vehicle was not covered under warranty. the vehicle was not repaired. the manufacturer was not made aware of the failure. the approximate failure mileage was 100,000.
+
+--- iter 2750 | val 3.822
+the vehicle has been inspected by our local ford dealership. the dealer has been notified of the issue. the dealership has the part of the issue and repair will be performed for the replacement part. the manufacturer was notified of the issue. the contact had not experienced a failure.
+
+--- iter 3000 | val 3.700
+the vehicle was taken to a repair shop who diagnosed the ignition switch. the vehicle was taken to an independent mechanic where the failure continued. the vehicle was taken to the dealer, who stated that there was an abnormal knocking sound coming from the engine and the engine. the manufacturer was not notified of the failure. the
+
+--- iter 3250 | val 3.778
+the vehicle was brought to a local dealer where it was diagnosed that the steering wheel needed to be replaced. the vehicle was not repaired. the failure mileage was approximately 6,000.
+
+--- iter 3500 | val 3.704
+the vehicle was taken to a local mechanic who diagnosed the failure. the vehicle was not repaired. the manufacturer was not notified of the failure. the failure mileage was approximately 1,000.
+
+--- iter 3750 | val 3.596
+the vehicle was also included in the recall. the manufacturer was not made aware of the issue. the contact had not experienced a failure.
+
+--- iter 4000 | val 3.569
+the vehicle was taken to a repair shop where it was diagnosed that the power train unit needed to be replaced. the vehicle was not repaired. the manufacturer was notified of the failure and stated that there were no assistance. the failure mileage was approximately 144,000.
+
+--- iter 4250 | val 3.686
+the vehicle was brought to a local dealer where it was diagnosed that the vehicle was experiencing a failure with the automatic transmission. the vehicle was taken to the dealer, where it was diagnosed that the transmission needed to be replaced. the vehicle was not repaired. the vehicle was not repaired. the manufacturer was not made aware
+
+--- iter 4500 | val 3.663
+the vehicle was involved in a collision and a police report to the driver's seat belt. the dealer was notified of the problem. the vehicle was destroyed. the manufacturer was made aware of the failure. the approximate failure mileage was 100,000. the vin was unavailable.
+
+--- iter 4750 | val 3.533
+the vehicle was serviced under nhtsa campaign number: 25v59000 (electrical system) however, the vin was not included in the recall. the manufacturer was notified of the failure and stated that there were no assistance related to the vin. the contact had not experienced a failure.
+
+--- iter 5000 | val 3.519
+the vehicle was brought to a local mechanic who diagnosed the failure. the vehicle was not repaired. the manufacturer was not notified of the failure. the failure mileage was approximately approximately 20,000.
+
+--- iter 5250 | val 3.568
+the vehicle was brought to a local dealer who diagnosed the vehicle and determined that the engine needed to be replaced. the vehicle was not repaired. the manufacturer was notified of the failure and referred the contact to nhtsa. the failure mileage was approximately 50,000.
+
+--- iter 5500 | val 3.582
+the vehicle was serviced at a local ford dealership. the vehicle was repaired at the dealer. the dealer was contacted and the manufacturer was notified of the failure, but no assistance was provided. the vehicle was not repaired. the failure mileage was approximately 144,000.
+
+--- iter 5750 | val 3.510
+the vehicle was involved in a collision and a police report was filed. there were no injuries. the vehicle was towed to an authorized dealer. the dealer was notified. the vehicle was not diagnosed or repaired. the manufacturer was not notified. the failure mileage was approximately 130,000.
+
+--- iter 6000 | val 3.618
+the vehicle was brought to a repair facility where the contact was informed that there was an open nhtsa campaign number: 25v5100 (power train). the vehicle was not repaired. the manufacturer was not made aware of the failure. the failure mileage was approximately 70,000.
+
+--- iter 6250 | val 3.462
+the vehicle was brought to a local mechanic who diagnosed the failure. the vehicle was not yet repaired. the manufacturer was not notified of the failure. the failure mileage was approximately 203,000.
+
+--- iter 6500 | val 3.444
+the vehicle was brought to a repair shop who found the front axle bolt and the right rear tires were flat/fone. the vehicle was not repaired due to the axle failure. the manufacturer was not contacted about the failure. the approximate failure mileage was 80,000.
+
+--- iter 6750 | val 3.450
+the vehicle was brought to a local dealer who diagnosed the vehicle and stated that the engine needed to be replaced. the vehicle was not repaired. the manufacturer was notified of the failure. the failure mileage was approximately 129,000.
+
+--- iter 7000 | val 3.405
+the vehicle was brought to a local mechanic who diagnosed the vehicle and stated that the engine needed to be replaced. the vehicle was not repaired. the manufacturer was notified of the failure and stated that there were no recalls on the vin. the failure mileage was approximately 150,000.
+
+--- iter 7250 | val 3.395
+the vehicle was brought to a repair shop who found the front axle bolt and the right front arm were corroded.
+
+--- iter 7499 | val 3.416
+the vehicle was brought to a repair shop where it was discovered that the vehicle had been taken to an independent mechanic for the failure. the vehicle was not repaired. the contact did not receive any further assistance after the recall repair. the vehicle was taken to the dealer where it was diagnosed that the subframe needed to be
+

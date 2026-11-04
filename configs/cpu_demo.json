@@ -1,0 +1,19 @@
+{
+  "data_dir": "data/tokens/v1",
+  "train_file": "cpu_demo/train.bin",
+  "out_dir": "runs/cpu_demo",
+  "n_layer": 4,
+  "n_head": 4,
+  "d_model": 256,
+  "block_size": 128,
+  "batch_size": 16,
+  "max_iters": 7500,
+  "lr": 0.0015,
+  "min_lr": 0.00015,
+  "warmup_iters": 150,
+  "eval_interval": 250,
+  "eval_iters": 20,
+  "log_interval": 25,
+  "max_minutes": 110,
+  "extra": {"note": "CPU demo run on a 2-vCPU machine, 30M-token sample of train.bin spread across all years"}
+}

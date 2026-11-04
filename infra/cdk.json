@@ -1,0 +1,11 @@
+{
+  "app": "python app.py",
+  "context": {
+    "lambda_memory_mb": 2048,
+    "max_tokens_cap": 200,
+    "ec2": false,
+    "ec2_quant": "q4_k_m",
+    "my_ip": "",
+    "budget_email": ""
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "platform": "Linux-6.18.44-fc-v185-x86_64-with-glibc2.39",
+  "processor": "x86_64",
+  "cpu_count": 2,
+  "threads_used": 2,
+  "python": "3.13.18"
+}

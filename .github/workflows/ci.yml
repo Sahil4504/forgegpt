@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff
+      - run: ruff check .
+      - run: ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      # CPU-only PyTorch keeps the install small and fast.
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install -e ".[dev,serve]" onnx
+      # Unit tests: attention + causal mask, overfit-one-batch, KV-cache equivalence,
+      # ONNX export vs PyTorch, data cleaning, tokenizer, Lambda handler, FastAPI app.
+      - run: pytest -q
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install -e .
+      - name: generate() runs end to end on CPU with a fresh model
+        run: |
+          python - <<'PY'
+          import time, torch
+          from forgegpt.model import GPT, GPTConfig
+          from forgegpt.generate import SamplingConfig, timed_generation
+          torch.manual_seed(0)
+          m = GPT(GPTConfig(n_layer=2, d_model=128, n_head=4, block_size=64))
+          r = timed_generation(m, [1, 2, 3], SamplingConfig(max_new_tokens=32, stop_at_eot=False))
+          assert len(r["tokens"]) == 32, r
+          print(f"ttft {r['ttft_ms']:.1f} ms, {r['decode_tok_per_s']:.0f} tok/s")
+          PY

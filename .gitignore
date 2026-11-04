@@ -37,3 +37,9 @@ cdk.out/
 Thumbs.db
 .vscode/
 .idea/
+
+# Build outputs and run artifacts (models go to S3 / GitHub releases, not git)
+artifacts/
+runs/
+serving/lambda/build/
+serving/lambda/dist/

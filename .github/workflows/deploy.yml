@@ -1,0 +1,38 @@
+name: Deploy (manual)
+
+# Deploys the CDK stack with short-lived credentials from GitHub OIDC: no AWS keys are
+# stored in the repo. One-time setup: create an IAM role trusted by
+# token.actions.githubusercontent.com for this repo, then add repository secrets
+# AWS_DEPLOY_ROLE_ARN, FORGEGPT_API_KEY and MODEL_BUCKET (bucket holding the model).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Fetch model + tokenizer
+        run: |
+          mkdir -p artifacts/onnx data/tokenizer/v1
+          aws s3 cp s3://${{ secrets.MODEL_BUCKET }}/models/forgegpt/v1/forgegpt.int8.onnx artifacts/onnx/
+          aws s3 cp s3://${{ secrets.MODEL_BUCKET }}/models/forgegpt/v1/forgegpt.onnx artifacts/onnx/
+          aws s3 cp s3://${{ secrets.MODEL_BUCKET }}/tokenizer/v1/bpe-8k.json data/tokenizer/v1/
+      - run: python serving/lambda/build.py
+      - run: npm install -g aws-cdk && pip install -r infra/requirements.txt
+      - run: cd infra && cdk deploy --require-approval never -c api_key=${{ secrets.FORGEGPT_API_KEY }}

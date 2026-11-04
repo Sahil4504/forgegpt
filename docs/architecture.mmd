@@ -1,0 +1,29 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "DejaVu Sans, Arial", "fontSize": "15px", "primaryColor": "#f8fafb", "primaryBorderColor": "#1c2733", "primaryTextColor": "#1c2733", "lineColor": "#536170", "clusterBkg": "#eef1f4", "clusterBorder": "#b9c4cf"}}}%%
+flowchart TB
+  subgraph DATA["1 · Data pipeline (laptop)"]
+    direction LR
+    A["NHTSA complaints<br/>2.26M rows"] --> B["clean + dedupe<br/>mask PII, lowercase"] --> C["1.62M narratives<br/>90/5/5 split"] --> D["byte-level BPE<br/>8,192 tokens"] --> E["uint16 token files<br/>149M train tokens"]
+  end
+  subgraph TRAIN["2 · Training (Kaggle T4 GPU, or CPU demo)"]
+    direction LR
+    F["GPT written from scratch<br/>causal attention, pre-LN<br/>tied embeddings"] --> G["AdamW, cosine LR<br/>fp16, checkpoint/resume"]
+  end
+  subgraph OPT["3 · CPU inference optimization"]
+    direction LR
+    H["KV cache<br/>top-k / top-p sampling"] --> I["ONNX export<br/>KV cache inside the graph"] --> J["INT8 dynamic<br/>quantization"]
+  end
+  subgraph SERVE["4 · Serving"]
+    direction LR
+    P["Web GUI + API<br/>FastAPI, streaming"]
+    K["AWS Lambda<br/>Function URL<br/>ONNX Runtime only"]
+    L["EC2 m7i-flex.large<br/>llama.cpp<br/>Qwen2.5-0.5B GGUF"]
+    P ~~~ K ~~~ L
+  end
+  subgraph OBS["5 · Measure"]
+    direction LR
+    O["Locust load tests<br/>p50 / p95, req/s"] --> Q["CloudWatch EMF metrics<br/>+ dashboard"] --> R["cost per 1k requests"]
+  end
+  DATA --> TRAIN
+  TRAIN --> OPT
+  OPT --> SERVE
+  SERVE --> OBS

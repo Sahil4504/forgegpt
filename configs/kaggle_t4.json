@@ -1,0 +1,19 @@
+{
+  "data_dir": "/kaggle/input/forgegpt-tokens-v1",
+  "tokenizer": "/kaggle/input/forgegpt-tokens-v1/bpe-8k.json",
+  "out_dir": "/kaggle/working/runs/t4_6L384",
+  "n_layer": 6,
+  "n_head": 6,
+  "d_model": 384,
+  "block_size": 256,
+  "batch_size": 64,
+  "max_iters": 10000,
+  "lr": 0.001,
+  "min_lr": 0.0001,
+  "warmup_iters": 300,
+  "eval_interval": 500,
+  "eval_iters": 50,
+  "log_interval": 50,
+  "max_minutes": 600,
+  "extra": {"note": "Full run: ~14M params, ~1.1 epochs over 149M tokens on a Kaggle T4 (fp16)"}
+}

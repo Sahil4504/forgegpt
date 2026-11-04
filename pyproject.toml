@@ -18,9 +18,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Model + training (Phase 2). On Kaggle, torch is already installed.
-train = ["torch>=2.2", "mlflow"]
-dev = ["pytest", "ruff"]
+# Model + training. On Kaggle, torch is already installed.
+train = ["torch>=2.2", "onnx", "onnxruntime", "mlflow"]
+# Serving: ONNX Runtime only (no torch), FastAPI app + web GUI.
+serve = ["onnxruntime", "fastapi", "uvicorn[standard]"]
+# Benchmarks and charts.
+bench = ["matplotlib", "psutil", "locust", "tabulate", "requests"]
+dev = ["pytest", "ruff", "httpx"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/forgegpt"]
@@ -32,6 +36,7 @@ pythonpath = ["src"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+extend-exclude = ["notebooks", "infra/cdk.out", "serving/lambda/build"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]

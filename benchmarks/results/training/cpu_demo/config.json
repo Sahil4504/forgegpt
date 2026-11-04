@@ -1,0 +1,47 @@
+{
+  "train": {
+    "data_dir": "data/tokens/v1",
+    "train_file": "cpu_demo/train.bin",
+    "val_file": "val.bin",
+    "tokenizer": "data/tokenizer/v1/bpe-8k.json",
+    "out_dir": "runs/cpu_demo",
+    "n_layer": 4,
+    "n_head": 4,
+    "d_model": 256,
+    "block_size": 128,
+    "dropout": 0.0,
+    "batch_size": 16,
+    "grad_accum": 1,
+    "max_iters": 7500,
+    "lr": 0.0015,
+    "min_lr": 0.00015,
+    "warmup_iters": 150,
+    "weight_decay": 0.1,
+    "beta1": 0.9,
+    "beta2": 0.95,
+    "grad_clip": 1.0,
+    "eval_interval": 250,
+    "eval_iters": 20,
+    "log_interval": 25,
+    "max_minutes": 110,
+    "device": "auto",
+    "dtype": "auto",
+    "compile": false,
+    "seed": 1337,
+    "resume": true,
+    "mlflow": false,
+    "sample_prompt": "the vehicle",
+    "extra": {
+      "note": "CPU demo run on a 2-vCPU machine, 30M-token sample of train.bin spread across all years"
+    }
+  },
+  "model": {
+    "vocab_size": 8192,
+    "block_size": 128,
+    "n_layer": 4,
+    "n_head": 4,
+    "d_model": 256,
+    "dropout": 0.0,
+    "bias": false
+  }
+}

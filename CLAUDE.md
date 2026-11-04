@@ -57,11 +57,19 @@ docs/              plan, architecture diagram, write-ups
 | 7 | IaC, CI, README, demo video, final teardown | Laptop + GitHub | 8 |
 
 ## Current status
-- [ ] Phase 0 — in progress: repo scaffold created 2026-11-01; AWS account setup pending
-- [ ] Phase 1 — in progress: data cleaned (1.62M narratives), bpe-8k tokenizer trained, token files written (149M train tokens); see docs/DATA.md. Remaining: S3 upload (needs AWS account)
+- [ ] Phase 0 — repo done; AWS account setup pending (see docs/DEPLOY.md section 0)
+- [x] Phase 1 — data cleaned (1.62M narratives), bpe-8k tokenizer, token files (149M train tokens). S3 upload happens via `cdk deploy`.
+- [x] Phase 2 — GPT from scratch + tests; CPU demo model trained (runs/cpu_demo). Full 14M-param run: notebooks/kaggle_train.ipynb (not yet run)
+- [x] Phase 3 — KV cache, sampling, ONNX export with cache in graph, INT8; benchmarks in benchmarks/results/
+- [x] Phase 4 — Lambda handler + zip build (tested on Python 3.12), CDK stack. Not yet deployed.
+- [x] Phase 5 — EC2 user-data for llama.cpp + Qwen2.5-0.5B (Q4_K_M/Q8_0). Not yet deployed.
+- [x] Phase 6 — Locust load tests (local results), EMF metrics + dashboard in CDK, cost model
+- [x] Phase 7 — CDK, GitHub Actions CI + OIDC deploy workflow, README, web GUI
+- Next for Sahil: AWS account (Phase 0), Kaggle full run, `cdk deploy`, AWS benchmarks, teardown.
 - AWS account creation date: _fill in_ (free plan ends 6 months after this)
 
 ## Decisions log
+- 2026-11-02: Built everything in one pass at Sahil's request (portfolio deadline). Demo model trained on CPU (4L/4H/256, ctx 128) on a 30M-token sample; benchmark numbers are from a 2-vCPU machine and labelled as local. Lambda uses ONNX Runtime + numpy only (zip, no container), x86_64, 2 GB. KV cache is exported inside the ONNX graph.
 - 2026-11-01: Tokenizer vocab 8,192 (16k only 2.5% fewer tokens, 2x embedding params). Token files are flat uint16 streams with <|endoftext|> (id 0) after each narrative.
 - 2026-11-01: Lowercase all narratives (pre-2021 data is ALL CAPS). Mask phone/email/URL/VIN with placeholder tokens. Hash-based 90/5/5 split after dedup.
 - 2026-11-01: Chose free-plan-only AWS; GPU work moved to Kaggle/Colab. Dataset: NHTSA complaints. Serving: Lambda (own model) + llama.cpp on m7i-flex.large (open model).
