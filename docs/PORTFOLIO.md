@@ -1,6 +1,6 @@
 # Portfolio notes
 
-## Resume bullets (every number is measured; update them after the Kaggle / AWS runs)
+## Resume bullets (every number is measured; update them after the Kaggle run)
 
 - Implemented a GPT-style decoder-only transformer from scratch in PyTorch (causal multi-head
   attention, pre-LN blocks, weight tying, KV cache, top-k/top-p sampling) and trained it on
@@ -9,10 +9,9 @@
 - Exported the model to ONNX with the KV cache inside the graph and applied INT8
   quantization, cutting CPU generation time 9.4x (94 → 876 tokens/s) and memory 4.6x
   (636 → 137 MB) at a 1.2% perplexity cost.
-- Built serverless serving on AWS Lambda (ONNX Runtime only, 48 MB zip, Function URL, API
-  key, CloudWatch EMF metrics) and an EC2 llama.cpp baseline with AWS CDK and GitHub Actions
-  (55 tests, OIDC deploys); load-tested with Locust (14.7 req/s peak per 2 vCPUs) and modelled
-  cost per 1k requests (Lambda cheaper below ~10 req/s sustained).
+- Served the INT8 model through a FastAPI API with token streaming and a web UI; load-tested
+  with Locust (14.7 req/s peak, 76 ms single-user p50 latency on 2 vCPUs), backed by 55 unit
+  and integration tests in GitHub Actions CI.
 
 ## Interview talking points
 
@@ -32,8 +31,9 @@
 6. **Why ONNX Runtime and not PyTorch on Lambda?** PyTorch does not fit a zip deployment and
    uses 4x the memory; ORT's INT8 kernels are what give the speedup (PyTorch dynamic INT8 was
    no faster).
-7. **Lambda or EC2?** Lambda costs per request, EC2 per hour. With measured latency/throughput,
-   Lambda is cheaper below ~10 req/s sustained; above that, a busy instance wins.
+7. **How would you deploy it?** The repo is Lambda-ready (ONNX Runtime-only zip + AWS CDK) but
+   not deployed. Lambda costs per request, EC2 per hour; projecting from local measurements,
+   Lambda is cheaper below ~10 req/s sustained, and a busy instance wins above that.
 8. **What would you do next?** Train the 14M model on Kaggle, deploy and replace projected
    numbers with AWS measurements, add response streaming, and fine-tune on complaint
    summarization to make it useful beyond text continuation.
