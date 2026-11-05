@@ -1,6 +1,6 @@
 variant,label,model_mb,load_s,peak_rss_mb,ttft_ms_p50,decode_tok_per_s,latency_ms_p50,latency_ms_p95,test_loss,test_ppl,new_tokens
-torch_fp32_nocache,"PyTorch FP32, no KV cache",21.1,2.42,636.0,8.72,93.7,687.2,761.3,3.4508,31.53,64
-torch_fp32,PyTorch FP32 + KV cache,21.1,2.14,636.0,8.92,237.6,270.0,313.4,3.4508,31.53,64
-torch_int8,PyTorch INT8 (dynamic) + KV cache,13.8,2.42,638.0,5.46,238.4,271.2,330.0,3.4652,31.98,64
-onnx_fp32,ONNX Runtime FP32 + KV cache,29.6,0.5,156.0,3.12,500.2,126.5,157.0,3.4508,31.53,64
-onnx_int8,ONNX Runtime INT8 + KV cache,7.5,0.18,137.0,2.24,876.4,72.4,98.6,3.463,31.91,64
+torch_fp32_nocache,"PyTorch FP32, no KV cache",55.5,1.75,676.0,15.95,53.4,1187.7,1344.3,2.7718,15.99,64
+torch_fp32,PyTorch FP32 + KV cache,55.5,2.23,665.0,15.53,180.2,358.7,417.4,2.7718,15.99,64
+torch_int8,PyTorch INT8 (dynamic) + KV cache,26.8,1.82,674.0,5.8,246.3,259.0,297.6,2.7848,16.2,64
+onnx_fp32,ONNX Runtime FP32 + KV cache,68.2,1.0,278.0,5.83,237.4,266.1,312.9,2.7718,15.99,64
+onnx_int8,ONNX Runtime INT8 + KV cache,17.3,0.27,220.0,3.73,605.6,105.2,135.0,2.7768,16.07,64

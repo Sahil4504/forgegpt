@@ -1,22 +1,22 @@
 # ForgeGPT
 
-**A GPT written from scratch, trained on 1.6 million vehicle complaints, made fast on CPU,
-and packaged for serverless serving on AWS, with every step measured.**
+**A GPT written from scratch, trained on 1.6 million vehicle complaints, and made 11× faster
+for CPU inference, with every step measured.**
 
 ![ForgeGPT playground](docs/images/gui_playground.png)
 
 ForgeGPT is a decoder-only transformer (the GPT-2 architecture) implemented in plain PyTorch:
 attention, blocks, embeddings and the training loop are all in this repo, with no
 `nn.Transformer`. It is trained on the narratives of the public NHTSA vehicle-complaints
-database, optimized for CPU inference (KV cache, ONNX Runtime, INT8), served through a web
-GUI and an AWS Lambda function, and benchmarked for latency, throughput and cost.
+database, optimized for CPU inference (KV cache, ONNX Runtime, INT8), served through a
+streaming API and web GUI, and benchmarked for quality, latency, throughput and memory.
 
-> **What has been run and what is ready to run.** Everything below was executed and
-> measured on a 2-vCPU Linux machine with a **5.3M-parameter demo model trained on CPU**
-> (15.4M tokens, 96 minutes). The full-size 14M-parameter run
-> (`notebooks/kaggle_train.ipynb`, free Kaggle T4) and the AWS deployment (`infra/`, one
-> `cdk deploy`) are scripted and tested locally, but not yet executed: see
-> [docs/DEPLOY.md](docs/DEPLOY.md). No number in this README is estimated unless it says so.
+> **What was run.** The 13.9M-parameter model was trained on a free Kaggle Tesla T4
+> (163.8M tokens, 44 minutes), with five ablation runs. All CPU benchmarks ran on a 2-vCPU
+> Linux machine. The repo is also **Lambda-ready**: the AWS Lambda package and AWS CDK stack
+> in `infra/` are built and tested locally, but not deployed (see
+> [docs/DEPLOY.md](docs/DEPLOY.md)). Numbers marked *projected* are computed from local
+> measurements; everything else is measured.
 
 ## Architecture
 
@@ -27,13 +27,12 @@ GUI and an AWS Lambda function, and benchmarked for latency, throughput and cost
 | Data | Download, clean (11 rules), dedupe, split 2.26M rows → 1.62M narratives | `scripts/download_nhtsa.py`, `src/forgegpt/clean.py` |
 | Tokenizer | Byte-level BPE, 8,192 tokens, trained on the train split | `src/forgegpt/tokenizer.py` |
 | Model | Causal multi-head attention, pre-LN blocks, GELU MLP, tied embeddings, KV cache | `src/forgegpt/model.py` |
-| Training | AdamW, warmup + cosine, grad clipping, fp16 on GPU, checkpoint/resume, CSV/MLflow logs | `src/forgegpt/train.py` |
+| Training | AdamW, warmup + cosine, grad clipping, fp16 + grad scaler, checkpoint/resume, ablations | `src/forgegpt/train.py`, `notebooks/kaggle_train.ipynb` |
 | Inference | Greedy / temperature / top-k / top-p, KV-cached streaming generation | `src/forgegpt/generate.py` |
 | Optimization | ONNX export with the KV cache inside the graph, dynamic INT8 quantization | `src/forgegpt/onnx_export.py` |
 | Serving | FastAPI + web GUI with token streaming; Lambda handler (ONNX Runtime + numpy only) | `serving/` |
-| Open-model baseline | llama.cpp + Qwen2.5-0.5B-Instruct (Q4_K_M / Q8_0) on EC2 m7i-flex.large | `serving/ec2/` |
-| Infrastructure | AWS CDK: S3, 2 Lambdas + Function URLs, optional EC2, CloudWatch dashboard, budget | `infra/` |
-| Quality | 55 unit tests, ruff, GitHub Actions CI, OIDC deploy workflow | `tests/`, `.github/` |
+| Deployment (ready, not deployed) | AWS CDK: S3, Lambda + Function URL, optional EC2 llama.cpp baseline, dashboard | `infra/`, `serving/ec2/` |
+| Quality | 55 unit and integration tests, ruff, GitHub Actions CI | `tests/`, `.github/` |
 
 ## Results
 
@@ -51,86 +50,142 @@ analyst tags and legal boilerplate and masks phone numbers, emails, URLs and VIN
 
 A custom 8k byte-level BPE encodes complaints in 100.6 tokens on average versus 101.7 for
 GPT-2's 50k vocabulary. At width 384 that is a 3.1M-parameter embedding table instead of
-19.3M, which matters in a model this size, and a 6x smaller output layer on CPU.
+19.3M, which matters in a model this size, and a 6× smaller output layer on CPU.
 
 ### Training
 
 ![Training curves](docs/images/training_curves.png)
 
-The demo model (4 layers, 4 heads, width 256, context 128; 5.3M parameters) trained for 7,500 steps of 16 × 128 tokens, 15.4M tokens in total, in 96 minutes on 2 vCPUs at about 2,900 tokens/s. Validation loss fell from 9.06 (perplexity 8,580: a uniform guess over the 8,192-token vocabulary) to **3.40, a perplexity of 29.8**. Train and validation curves stay together: the model has seen only ~10% of the 149M available training tokens, so it is limited by compute, not by data, and does not overfit. The full 14M-parameter configuration in `configs/kaggle_t4.json` sees about 10× more tokens on a free Kaggle T4.
+The model (6 layers, 6 heads, width 384, context 256; 13.9M parameters) trained for 10,000
+steps of 64 × 256 tokens: 163.8M tokens, about 1.1 epochs of the training split, in
+**44 minutes on a Kaggle Tesla T4** in fp16 at ~82,000 tokens/s. Validation loss fell from
+9.04 (perplexity 8,461: a uniform guess over the 8,192-token vocabulary) to **2.753, a
+perplexity of 15.7**. Train and validation loss stay together (2.729 vs 2.753 at the end),
+so there is no overfitting at this budget. For comparison, a 5.3M-parameter model trained on
+CPU for 96 minutes (`configs/cpu_demo.json`) reached 29.8.
 
-Full logs, config and per-evaluation samples: [`benchmarks/results/training/cpu_demo/`](benchmarks/results/training/cpu_demo/).
+Full logs, configs and per-evaluation samples: [`benchmarks/results/training/`](benchmarks/results/training/).
 
-Samples from the final checkpoint (prompt in bold, temperature 0.8, top-k 50, top-p 0.95):
+Samples from the final model (prompt in bold; INT8 ONNX, temperature 0.8, top-k 50, top-p 0.95):
 
-> **while driving on the highway at 65 mph the** car died. after the car turned off and on again, the same thing happened. the car was towed to the nearest chevy dealership and was told there was a recall for this exact problem. the car is still under recall for the same issue. i am concerned that this is a common problem with this car, but my vin is not included in this
+> **while driving on the highway at 65 mph the** vehicle lost power. the gas pedal was very
+> difficult to press. the vehicle was shaking and the engine light illuminated. the vehicle was
+> taken to a dealer, who diagnosed that the accelerator pedal sensor needed to be replaced. the
+> vehicle was repaired, but the failure recurred.
 >
-> **the contact owns a 2019** ford f-150. the contact stated while driving at an undisclosed speed, there was an abnormal sound coming from the vehicle. the contact stated that the failure was intermittent and the check engine warning light was illuminated. the contact stated that the vehicle had been taken to the dealer where it was diagnosed that the engine needed to be replaced.
+> **the contact owns a 2019** honda hr-v. the contact stated that the rear seat belt latch would
+> not function properly. the contact stated that he attempted to release the seat belt but the
+> latch failed to operate. the vehicle was taken to the dealer and the dealer repaired the vehicle.
 >
-> **the airbag warning light** is on and the dash lights are on. i would have to press the gas pedal and start the car. this has happened twice and it is a safety hazard that could cause a crash.
+> **the airbag warning light** is on and the passenger airbag is not working. i have been told
+> that it may be the passenger seat sensor which has been recalled on other model vehicles. my
+> car has been at the dealership since march 2023 and they were unable to find a problem.
 
-It has learned both registers of the data: first-person owner complaints and NHTSA's own "the contact stated…" summaries. Longer outputs drift (*"i asked them to bring it back and i could call me back"*), which is expected at this size and training budget. Seeds 1, 3 and 2; the INT8 ONNX model, the same one the GUI and Lambda serve.
+It writes in both registers of the data: first-person owner complaints and NHTSA's own
+"the contact stated…" summaries. Like any language model it also invents plausible details,
+such as recall campaign numbers (*"nhtsa campaign number: 14v351000"*) and model names.
+
+#### Ablations
+
+![Ablations](docs/images/ablations.png)
+
+| Run (2,000 steps, 32.8M tokens each) | Parameters | Best val loss | Val perplexity | Train time |
+|---|---:|---:|---:|---:|
+| Baseline: 6 layers, context 256, lr 1e-3 | 13.9M | 3.102 | 22.3 | 7.9 min |
+| Learning rate 3e-3 | 13.9M | **3.055** | **21.2** | 7.8 min |
+| 8 layers | 17.4M | 3.087 | 21.9 | 9.9 min |
+| Context 128 (batch 128, same tokens/step) | 13.8M | 3.099 | 22.2 | 6.9 min |
+| 4 layers | 10.3M | 3.131 | 22.9 | 5.6 min |
+
+- A **higher learning rate** gave the largest gain at this short budget. It is a cheap change
+  to try in the full run, though short-run gains from a higher LR do not always hold to the end.
+- **Depth helps steadily** (4 → 6 → 8 layers: 3.131 → 3.102 → 3.087), but 8 layers costs 26%
+  more parameters and 25% more training time for a 0.015 gain.
+- **Context 128 vs 256** made no real difference at equal tokens (each measured at its own
+  context length); most complaints fit in 128 tokens anyway (median 79).
+- One seed per run, so differences below about 0.01 should be read as noise.
 
 ![Attention heads](docs/images/attention_heads.png)
 
-Different heads in the last layer learn different jobs. Head 2 parks most of its attention on the first token (a common "resting" pattern). Head 4 keeps returning to *brake* from *and*, *the*, *vehicle* and *not*: it tracks what the complaint is about. Head 1 links *stop* back to *vehicle*, and head 3 links *and* and *vehicle* to the verb *went*.
+Different heads in the last layer learn different jobs. Early tokens in every head attend to
+the first token (a common "attention sink"). Head 4 keeps reading the *the* that opens
+*"the brake pedal"* from later words (*brake*, *pedal*, *floor*, *vehicle*, *stop*): it
+tracks the subject of the sentence. Head 1 links the end of the clause (*vehicle*, *not*) back
+to the speed, *45*.
 
 ### CPU inference
 
 | Variant | Model file | Peak RAM | Time to first token | Decode speed | 64-token latency (p50) | Test perplexity |
 |---|---:|---:|---:|---:|---:|---:|
-| PyTorch FP32, no KV cache | 21.1 MB | 636 MB | 8.7 ms | 94 tok/s | 687 ms | 31.53 |
-| PyTorch FP32 + KV cache | 21.1 MB | 636 MB | 8.9 ms | 238 tok/s | 270 ms | 31.53 |
-| PyTorch INT8 (dynamic) + KV cache | 13.8 MB | 638 MB | 5.5 ms | 238 tok/s | 271 ms | 31.98 |
-| ONNX Runtime FP32 + KV cache | 29.6 MB | 156 MB | 3.1 ms | 500 tok/s | 126 ms | 31.53 |
-| **ONNX Runtime INT8 + KV cache** | 7.5 MB | 137 MB | 2.2 ms | 876 tok/s | 72 ms | 31.91 |
+| PyTorch FP32, no KV cache | 55.5 MB | 676 MB | 15.9 ms | 53 tok/s | 1188 ms | 15.99 |
+| PyTorch FP32 + KV cache | 55.5 MB | 665 MB | 15.5 ms | 180 tok/s | 359 ms | 15.99 |
+| PyTorch INT8 (dynamic) + KV cache | 26.8 MB | 674 MB | 5.8 ms | 246 tok/s | 259 ms | 16.20 |
+| ONNX Runtime FP32 + KV cache | 68.2 MB | 278 MB | 5.8 ms | 237 tok/s | 266 ms | 15.99 |
+| **ONNX Runtime INT8 + KV cache** | **17.3 MB** | **220 MB** | **3.7 ms** | **606 tok/s** | **105 ms** | **16.07** |
 
-30 prompts from the test split, 16-token prompt, 64 generated tokens (greedy), 2 threads; perplexity on 200 random 128-token test windows. Each variant runs in its own process.
+30 prompts from the test split, 16-token prompt, 64 generated tokens (greedy), 2 threads;
+perplexity on 200 random 256-token test windows. Each variant runs in its own process.
 
 ![Inference variants](docs/images/inference_variants.png)
 
-- **KV cache: 2.5× faster decoding** (94 → 238 tokens/s) with identical output: it is tested to give the same logits as a full forward pass.
-- **ONNX Runtime: another 2.1×** over PyTorch with the same cache, and **4× less memory** (156 MB vs 636 MB) because the serving process never imports PyTorch.
-- **INT8 dynamic quantization: 1.75× faster again and 4× smaller** (7.5 MB), for a **1.2% perplexity increase** (31.53 → 31.91).
-- End to end: **9.4× faster decoding** than the PyTorch baseline, 64 tokens in 72 ms.
-- PyTorch's own dynamic INT8 shrinks the weights but is no faster here; the speedup comes from ONNX Runtime's fused INT8 kernels. The FP32 ONNX file is larger than the PyTorch weights because the export stores the tied embedding and output matrices separately.
+- **KV cache: 3.4× faster decoding** (53 → 180 tokens/s) with identical output; it is tested
+  to give the same logits as a full forward pass.
+- **ONNX Runtime: 1.3× faster than PyTorch** with the same cache and **2.4× less memory**
+  (278 vs 665 MB), because the serving process never imports PyTorch.
+- **INT8 dynamic quantization: another 2.6× faster and 3.9× smaller** (17.3 MB) for a
+  **0.5% perplexity increase** (15.99 → 16.07). PyTorch's own dynamic INT8 is slower (246
+  tokens/s) and loses more quality (16.20).
+- End to end: **11.3× faster decoding** than the PyTorch baseline (64 tokens in 105 ms instead
+  of 1,188 ms) with **3.1× less memory**.
+- The FP32 ONNX file is larger than the PyTorch weights because the export stores the tied
+  embedding and output matrices separately.
 
 ![KV cache scaling](docs/images/kv_cache_scaling.png)
 
-Without a cache, generating token *t* re-runs the model over all *t* tokens, so each step gets slower (9.6 → 17.8 ms per token by position 128). With the cache, each step processes only the new token: a flat ~4.5 ms. The gap widens with longer contexts (256 in the full model).
+Without a cache, generating token *t* re-runs the model over all *t* tokens, so each step gets
+slower: from ~15 ms per token early on to ~51 ms by position 256. With the cache, each step
+processes only the new token: a flat ~5–6 ms, about 9× faster at full context.
 
 ### Serving under load (local API, 2 vCPUs)
 
 | Concurrent users | Requests | Failures | p50 | p95 | Throughput |
 |---:|---:|---:|---:|---:|---:|
-| 1 | 90 | 0 | 76 ms | 150 ms | 2.3 req/s |
-| 5 | 408 | 0 | 120 ms | 270 ms | 10.5 req/s |
-| 10 | 588 | 0 | 320 ms | 540 ms | 14.7 req/s |
-| 20 | 535 | 0 | 1100 ms | 1500 ms | 13.7 req/s |
+| 1 | 91 | 0 | 120 ms | 170 ms | 2.3 req/s |
+| 5 | 402 | 0 | 140 ms | 310 ms | 10.1 req/s |
+| 10 | 467 | 0 | 500 ms | 730 ms | 12.0 req/s |
+| 20 | 524 | 0 | 1200 ms | 1500 ms | 13.1 req/s |
 
-Locust, short prompts, up to 64 generated tokens per request, 40 s per level; the API and the load generator share the same 2-vCPU machine.
+Locust, short prompts, up to 64 generated tokens per request, 40 s per level; the API and the
+load generator share the same 2-vCPU machine.
 
 ![Load test](docs/images/load_test.png)
 
-A single 2-vCPU server peaks at about **14.7 requests/s with 10 concurrent users** (p95 540 ms). Beyond that, throughput stays flat and requests queue: at 20 users the p95 reaches 1.5 s. On AWS, Lambda avoids this by running one request per execution environment and scaling out; the cost of that is per-request pricing and cold starts.
+A single 2-vCPU server tops out at about **13 requests/s**. Past ~5 concurrent users,
+throughput barely rises and requests queue instead: from 5 to 20 users the p50 goes from 140 ms
+to 1.2 s. Scaling further means more CPU per server or more servers, which is what the
+Lambda-ready path provides (one request per execution environment, scaled out).
 
-### Cost per 1,000 requests
+### Cost per 1,000 requests (projected)
 
 | Option | Basis | Cost per 1,000 requests |
 |---|---|---:|
-| Lambda 2 GB, ForgeGPT INT8 (projected) | local p50 latency 72 ms for 64 tokens | $0.0026 |
-| EC2 m7i-flex.large, ForgeGPT INT8 at full load (projected) | local max 14.7 req/s at 10 users | $0.0018 |
+| Lambda 2 GB, ForgeGPT INT8 (projected) | local p50 latency 105 ms for 64 tokens | $0.0037 |
+| EC2 m7i-flex.large, ForgeGPT INT8 at full load (projected) | local max 13.1 req/s at 20 users | $0.0020 |
 
 ![Cost per 1k requests](docs/images/cost_per_1k.png)
 
-Lambda's cost per request is fixed, while an EC2 instance costs ~$70/month whether busy or idle. With these numbers **Lambda is cheaper below about 10 requests/s sustained (~0.9M requests/day)**, which covers any portfolio or internal-tool workload; above that, a busy instance wins. Both rows are *projected* from local measurements at us-east-1 list prices (Lambda $0.20 per 1M requests + $0.0000166667 per GB-s; m7i-flex.large $0.0958/h). After `cdk deploy`, `scripts/cost_model.py` adds measured AWS rows for Lambda and for Qwen2.5-0.5B on llama.cpp.
+Lambda's cost per request is fixed, while an always-on EC2 instance costs ~$70/month whether
+busy or idle. With these numbers **Lambda is cheaper below about 7 requests/s sustained (~0.6M
+requests/day)**; above that, a busy instance wins. Both rows are projections from local
+measurements at us-east-1 list prices (Lambda $0.20 per 1M requests + $0.0000166667 per GB-s;
+m7i-flex.large $0.0958/h). `scripts/cost_model.py` adds measured rows once the stack is deployed.
 
 ## Web GUI
 
-`uvicorn serving.app.main:app` serves a playground over the same ONNX Runtime code path that
-runs in Lambda: start a complaint, adjust temperature / top-k / top-p, watch tokens stream
-in with time-to-first-token and tokens/s, and switch on **Show tokens** to see exactly how
-the BPE tokenizer split the prompt and the output.
+`uvicorn serving.app.main:app` serves a playground over the same ONNX Runtime code path the
+Lambda handler uses: start a complaint, adjust temperature / top-k / top-p, watch tokens stream
+in with time-to-first-token and tokens/s, and switch on **Show tokens** to see exactly how the
+BPE tokenizer split the prompt and the output.
 
 | Token view (dark mode) | Model card |
 |---|---|
@@ -148,21 +203,21 @@ python scripts/prepare_data.py
 python scripts/train_tokenizer.py
 python scripts/encode_data.py
 
-# train (CPU demo; the full model runs on Kaggle: notebooks/kaggle_train.ipynb)
-python -m forgegpt.train --config configs/cpu_demo.json
+# train: full model on a free Kaggle T4 with notebooks/kaggle_train.ipynb (~45 min + ablations)
+#   or a small CPU-only model:  python -m forgegpt.train --config configs/cpu_demo.json
 
 # optimize, benchmark, chart
-python -m forgegpt.onnx_export --ckpt runs/cpu_demo/ckpt_best.pt --out-dir artifacts/onnx
-python scripts/benchmark_inference.py --ckpt runs/cpu_demo/ckpt_best.pt
+python -m forgegpt.onnx_export --ckpt runs/kaggle_t4/ckpt_best.pt --out-dir artifacts/onnx
+python scripts/benchmark_inference.py --ckpt runs/kaggle_t4/ckpt_best.pt
 uvicorn serving.app.main:app --port 8000 &                # GUI at http://localhost:8000
 python scripts/run_load_test.py --host http://localhost:8000
 python scripts/cost_model.py
-python scripts/make_charts.py --run runs/cpu_demo
+python scripts/make_charts.py
 
 pytest                                                   # 55 tests
 ```
 
-Deploying to AWS (Free plan) and running the full Kaggle training: [docs/DEPLOY.md](docs/DEPLOY.md).
+Deploying to AWS (Free plan): [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Engineering decisions
 
@@ -173,26 +228,24 @@ Deploying to AWS (Free plan) and running the full Kaggle training: [docs/DEPLOY.
 - **One ONNX graph for prefill and decode.** The KV cache is a graph input/output
   (`past` → `present`), so the same file handles the prompt (empty cache) and every
   following token. Tests check it against PyTorch for both phases.
-- **Lambda without PyTorch.** The handler needs only ONNX Runtime, numpy and tokenizers:
-  a 48 MB zip deployed without a container registry, with a 220–350 ms model
-  initialization (measured locally on the Lambda Python 3.12 runtime's wheels).
-- **Function URL instead of API Gateway**, with an API-key check, a `max_tokens` cap and
-  input validation in code, which keeps serving inside Lambda's always-free tier.
-- **Metrics with no extra API calls.** Each request logs one JSON line in CloudWatch
-  Embedded Metric Format; CloudWatch turns it into TTFT / latency / tokens-per-second
-  metrics for the dashboard.
-- **Free-plan guardrails in code.** No NAT gateway, EC2 opt-in and IP-restricted, SSM
-  instead of SSH, log retention of one week, budgets at $5/$20/$50, and `cdk destroy`
-  removes everything including the bucket.
+- **fp16, not bf16, on a T4.** PyTorch reports bf16 as supported on a T4 because it can
+  emulate it, which is several times slower; the trainer checks for native support
+  (compute capability 8.0+) and otherwise uses fp16 with a gradient scaler.
+- **A serving path without PyTorch.** Inference needs only ONNX Runtime, numpy and tokenizers:
+  220 MB of RAM instead of ~670 MB, and a 56 MB Lambda zip with ~150 ms model initialization
+  (measured on the Lambda Python 3.12 runtime's Linux wheels).
+- **Designed for cheap deployment.** The CDK stack uses a Function URL instead of API
+  Gateway, an API-key check, a `max_tokens` cap, CloudWatch Embedded Metric Format logs
+  instead of metric API calls, no NAT gateway, and `cdk destroy` removes everything.
 
 ## Limitations
 
-- The demo model is small and trained for 96 minutes on CPU; it writes fluent
-  complaint-style text but drifts on long generations and can repeat. The 14M-parameter
-  Kaggle run is the intended model.
-- Latency and cost numbers are from a 2-vCPU machine; AWS numbers will differ (Lambda at
-  2 GB gets about 1.2 vCPU). Rows marked *projected* are computed from local measurements.
 - The model continues text; it is not instruction-tuned and does not answer questions.
+- It invents specifics (recall campaign numbers, dealer names, model names) and longer
+  outputs can repeat themselves. The 14M-parameter model saw each training token about once.
+- Latency, throughput and cost numbers come from a 2-vCPU machine; AWS will differ (a 2 GB
+  Lambda gets about 1.2 vCPU). Cost rows are projections until the stack is deployed.
+- Ablations use one seed and a short budget.
 - A few free-text street addresses in older complaints are not masked (see docs/DATA.md).
 
 ## Project layout
@@ -200,13 +253,13 @@ Deploying to AWS (Free plan) and running the full Kaggle training: [docs/DEPLOY.
 ```
 src/forgegpt/      data, clean, tokenizer, model, train, generate, onnx_export, onnx_infer, serving
 scripts/           data pipeline, benchmarks, load tests, cost model, charts
-configs/           training configs (CPU demo, Kaggle T4)
+configs/           training configs (Kaggle T4, CPU demo)
 notebooks/         Kaggle training + ablations notebook
 serving/app/       FastAPI app + web GUI
 serving/lambda/    Lambda handler + zip builder
 serving/ec2/       llama.cpp user-data + benchmark script
 infra/             AWS CDK app (+ synth tests)
-benchmarks/        Locust file + results CSVs
+benchmarks/        Locust file, results CSVs, training logs
 tests/             unit and integration tests
-docs/              data card, deployment guide, charts
+docs/              data card, deployment guide, portfolio notes, charts
 ```

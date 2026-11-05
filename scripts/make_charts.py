@@ -143,7 +143,7 @@ def narrative_lengths() -> None:
     save(fig, "narrative_lengths.png")
 
 
-def training_curves(run: Path) -> None:
+def training_curves(run: Path, hardware: str) -> None:
     ev = run / "eval.csv"
     if not ev.exists():
         return
@@ -178,17 +178,16 @@ def training_curves(run: Path) -> None:
     ax.legend(loc="upper right")
     cfg = json.loads((run / "config.json").read_text())["model"]
     tok_s = int(log["tok_per_s"].median()) if log is not None else None
-    ax.set_title("Training the demo model on CPU")
+    ax.set_title(f"Training ForgeGPT on {hardware}")
     desc = f"{cfg['n_layer']} layers, {cfg['n_head']} heads, width {cfg['d_model']}"
     desc += f", context {cfg['block_size']}"
     if tok_s:
-        desc += f"; ~{tok_s:,} tokens/s on 2 vCPUs"
+        desc += f"; ~{tok_s:,} tokens/s"
     subtitle(ax, desc)
     save(fig, "training_curves.png")
 
 
-def attention_heads(run: Path, tokenizer: Path) -> None:
-    ckpt = run / "ckpt_best.pt"
+def attention_heads(ckpt: Path, tokenizer: Path) -> None:
     if not ckpt.exists() or not tokenizer.exists():
         return
     import torch
@@ -221,7 +220,7 @@ def attention_heads(run: Path, tokenizer: Path) -> None:
         fontsize=12.5,
         fontweight="bold",
         color=INK,
-        y=1.07,
+        y=1.1,
     )
     save(fig, "attention_heads.png")
 
@@ -294,7 +293,7 @@ def inference_variants() -> None:
         fontsize=12.5,
         fontweight="bold",
         color=INK,
-        y=1.04,
+        y=1.13,
     )
     save(fig, "inference_variants.png")
 
@@ -377,16 +376,57 @@ def cost_per_1k() -> None:
     save(fig, "cost_per_1k.png")
 
 
+def ablations(runs_dir: Path) -> None:
+    """Change in best validation loss vs the baseline, same token budget for every run."""
+    labels = {
+        "abl_lr3e-3": "learning rate 3e-3 (vs 1e-3)",
+        "abl_depth8": "8 layers (vs 6)",
+        "abl_ctx128": "context 128 (vs 256)",
+        "abl_depth4": "4 layers (vs 6)",
+    }
+    base_path = runs_dir / "abl_base" / "summary.json"
+    if not base_path.exists():
+        return
+    base = json.loads(base_path.read_text())["best_val_loss"]
+    rows = []
+    for run, label in labels.items():
+        path = runs_dir / run / "summary.json"
+        if path.exists():
+            rows.append((label, json.loads(path.read_text())["best_val_loss"] - base))
+    rows.sort(key=lambda r: r[1], reverse=True)
+    fig, ax = plt.subplots(figsize=(7.6, 0.6 * len(rows) + 1.6))
+    deltas = [d for _, d in rows]
+    colors = [BLUE if d < 0 else ORANGE for d in deltas]
+    bars = ax.barh([lbl for lbl, _ in rows], deltas, color=colors, height=0.55)
+    for b, d in zip(bars, deltas, strict=True):
+        ax.text(d, b.get_y() + b.get_height() / 2, f" {d:+.3f} " if d >= 0 else f"{d:+.3f} ",
+                va="center", ha="left" if d >= 0 else "right", color=INK, fontsize=9.5)  # fmt: skip
+    ax.axvline(0, color=INK_2, linewidth=1)
+    lim = max(abs(min(deltas)), abs(max(deltas))) * 1.6
+    ax.set_xlim(-lim, lim)
+    ax.set_xlabel("change in best validation loss vs baseline (negative is better)")
+    ax.grid(axis="y", visible=False)
+    ax.set_title("Ablations: one change at a time, 32.8M tokens each")
+    subtitle(
+        ax, f"baseline: 6 layers, width 384, context 256, lr 1e-3, val loss {base:.3f}; one seed"
+    )
+    save(fig, "ablations.png")
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--run", default="runs/cpu_demo")
+    p.add_argument("--run", default="benchmarks/results/training/kaggle_t4")
+    p.add_argument("--ckpt", default="runs/kaggle_t4/ckpt_best.pt")
+    p.add_argument("--hardware", default="a Kaggle Tesla T4")
+    p.add_argument("--ablations", default="benchmarks/results/training/ablations")
     p.add_argument("--tokenizer", default="data/tokenizer/v1/bpe-8k.json")
     args = p.parse_args()
     tokenizer_comparison()
     allcaps_by_year()
     narrative_lengths()
-    training_curves(Path(args.run))
-    attention_heads(Path(args.run), Path(args.tokenizer))
+    training_curves(Path(args.run), args.hardware)
+    ablations(Path(args.ablations))
+    attention_heads(Path(args.ckpt), Path(args.tokenizer))
     kv_cache_scaling()
     inference_variants()
     load_test()

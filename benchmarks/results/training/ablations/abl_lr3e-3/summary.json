@@ -1,0 +1,8 @@
+{
+  "best_val_loss": 3.055393877029419,
+  "best_val_ppl": 21.22954571076223,
+  "iters": 2000,
+  "tokens_seen": 32768000,
+  "minutes": 7.8,
+  "params": 13865856
+}

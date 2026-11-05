@@ -1,0 +1,63 @@
+--- iter 0 | val 9.043
+the vehicle took took debris 2025but axel rev malib install axel xl debris protect mergesist rotors undriveable hyert signal maneuveroriginalview valley pursu pursu smaller rdx axel fif advertised different-$ kind kind've engage examp ** loose incredibly depend depend revved pointcoviewaust infiniti bal given 39 operation dies plent grillview my spendames
+
+--- iter 500 | val 3.762
+the vehicle to the dealership where i needed a new transmission. this is the dealership is dangerous and in motion, as the car is more than a major safety issue, it is a major inconvenience for us to keep putting out on a major highway and will continue to drive the vehicle.
+
+--- iter 1000 | val 3.396
+the vehicle to the dealership where the dealer (mercedes) could not provide a remedy for the recall. the manufacturer was contacted but the contact was informed that the parts were not available for the recall remedy. the contact had not experienced a failure. vin tool confirms parts not available. updated 04/16/17
+
+--- iter 1500 | val 3.214
+the vehicle to the dealership, the dealer indicated that there was a leak in the engine, and the engine needed to be replaced. the vehicle was not diagnosed or repaired. the manufacturer was not notified of the failure. the failure mileage was approximately 90,000.
+
+--- iter 2000 | val 3.163
+the vehicle to the dealership, and the dealer was unable to duplicate the problem. the first time the car stalled while the car was in drive, the car was in drive and the car would not go over 25 mph. i was waiting for the car to stall at the time of the day. i had it
+
+--- iter 2500 | val 3.103
+the vehicle to the point where i needed to get it back in the garage. the first time it was parked in the driveway, i walked around to inspect and found that the transmission had rusted out. i did some research on this and it seems to be a common problem.
+
+--- iter 3000 | val 3.030
+the vehicle to the dealership, they will not replace the vehicle without cost. i have read online that this is a common complaint with the 6.4l v8 engines and toyota is not issuing a recall for the 3.6 engines and will not replace the engine.
+
+--- iter 3500 | val 3.014
+the vehicle to the dealership where i purchased the vehicle from. this is the second time it has stalled out on me while driving it, the first time it happened, it was towed to the dealership. i can't believe that they could not find any codes or error codes. so i took the vehicle to a
+
+--- iter 4000 | val 2.980
+the vehicle to the dealership where i purchased the vehicle, i was told the vehicle is working as designed. i have also contacted hyundai, they refused to fix and claim it is a safety issue. hyundai refuses to issue a recall, and i am now forced to pay for the repairs that are over $1,
+
+--- iter 4500 | val 2.943
+the vehicle has been serviced at the dealer 3 times for the same issue. the dealer was unable to determine the cause of the failure, the dealer has replaced the wiring harness and the abs module. the contact has also been experiencing a failure with the abs and traction control. the dealer has not been able to duplicate
+
+--- iter 5000 | val 2.911
+the vehicle has been serviced by the dealer 3 times for this problem. the dealership replaced the ignition switch, but the problem still exists. the dealer has replaced the ignition switch and the problem still exists. please provide further information.
+
+--- iter 5500 | val 2.884
+the vehicle has been running rough and will not start. vehicle has been inspected by the dealership and no repairs are available.
+
+--- iter 6000 | val 2.873
+the vehicle to the dealership the fuel pump is leaking.the dealer states the vehicle is not covered by warranty,and the vehicle is out of warranty.the consumer states the fuel pump is not covered.
+
+--- iter 6500 | val 2.827
+the vehicle has been in the shop for 3 days.the dealer states the vehicle is working as designed.
+
+--- iter 7000 | val 2.814
+the vehicle has been serviced by the dealer 3 times for this problem. the dealership is unable to duplicate the problem. the vehicle has been at the dealership for two weeks.
+
+--- iter 7500 | val 2.818
+the vehicle has been serviced by the dealer 3 times for the same issue. the dealer was unable to determine the cause of the issue, they had the vehicle for 3 more days, and they stated they could not replicate the issue, and they could not verify a problem. the problem has not been fixed. it
+
+--- iter 8000 | val 2.799
+the vehicle has been in the shop for 3 days.the dealer states the vehicle is working with no codes,and the vehicle is ready to be fixed.i contacted kia and they stated they cannot make any repairs unless the light is on, but will not give me a vehicle for them to look at it.
+
+--- iter 8500 | val 2.774
+the vehicle to the dealership, they could not duplicate the problem. the consumer stated the vehicle was in motion, going about 10 mph, the vehicle suddenly accelerated and the vehicle hit another vehicle in the rear. the dealer has not been contacted. the consumer stated the problem was intermittent. updated 04/02/09
+
+--- iter 9000 | val 2.767
+the vehicle has been in the shop for 3 days.the dealer states the vehicle is working as designed.
+
+--- iter 9500 | val 2.769
+the vehicle has been in the shop for 3 days for the same issue. dealership is unable to resolve issue, as the vehicle is out of warranty and they are unable to resolve the issue. they have replaced the battery, starter, and now the issue is still ongoing. vehicle is unsafe to drive.
+
+--- iter 9999 | val 2.753
+the vehicle has been in the shop for 3 days for the problem. the dealership is unable to duplicate the problem. the vehicle has been returned to the dealership for the same problem, but they cannot duplicate the problem.
+

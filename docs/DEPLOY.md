@@ -20,20 +20,21 @@ in total, $0 on Kaggle. Region: `us-east-1` throughout.
 6. Install Node.js 20+ and the CDK CLI: `npm install -g aws-cdk`, then once per
    account/region: `cdk bootstrap`.
 
-## 1. Full training run on Kaggle (free GPU, ~1 hour)
+## 1. Full training run on Kaggle (free GPU, ~1.5 hours with ablations) — done 2026-11-04
 
-1. Create a **private Kaggle dataset** called `forgegpt-tokens-v1` with
-   `data/tokens/v1/{train,val,test}.bin`, `data/tokens/v1/meta.json` and
-   `data/tokenizer/v1/bpe-8k.json` (~330 MB).
-2. Push this repo to GitHub, upload `notebooks/kaggle_train.ipynb` to Kaggle, set
-   `REPO_URL`, choose a T4 GPU, add the dataset, run all cells.
-3. Download `runs/t4_6L384/` from the notebook's Output tab into `runs/t4_6L384/` locally.
+1. Create a **private Kaggle dataset** called `forgegpt-tokens-v1` with the five files in
+   `data/kaggle_upload/` (`train.bin`, `val.bin`, `test.bin`, `meta.json`, `bpe-8k.json`).
+2. Import `notebooks/kaggle_train.ipynb`, choose **GPU T4 x2** (not P100) with Internet on,
+   add the dataset, then **Save Version → Save & Run All (Commit)**. The log should show
+   `dtype=torch.float16`.
+3. From the version's **Output** tab download `forgegpt_results`; put its `ckpt_best.pt` and
+   `logs/t4_6L384/summary.json` in `runs/kaggle_t4/`.
 4. Re-run the local steps against the new checkpoint:
 
 ```bash
-python -m forgegpt.onnx_export --ckpt runs/t4_6L384/ckpt_best.pt --out-dir artifacts/onnx
-python scripts/benchmark_inference.py --ckpt runs/t4_6L384/ckpt_best.pt
-python scripts/make_charts.py --run runs/t4_6L384
+python -m forgegpt.onnx_export --ckpt runs/kaggle_t4/ckpt_best.pt --out-dir artifacts/onnx
+python scripts/benchmark_inference.py --ckpt runs/kaggle_t4/ckpt_best.pt
+python scripts/make_charts.py
 ```
 
 ## 2. Deploy (one command)

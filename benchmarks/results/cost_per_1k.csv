@@ -1,3 +1,3 @@
 option,basis,cost_per_1k_usd,measured_on
-"Lambda 2 GB, ForgeGPT INT8 (projected)",local p50 latency 72 ms for 64 tokens,0.00261,local CPU
-"EC2 m7i-flex.large, ForgeGPT INT8 at full load (projected)",local max 14.7 req/s at 10 users,0.00181,local CPU (2 vCPU)
+"Lambda 2 GB, ForgeGPT INT8 (projected)",local p50 latency 105 ms for 64 tokens,0.00371,local CPU
+"EC2 m7i-flex.large, ForgeGPT INT8 at full load (projected)",local max 13.1 req/s at 20 users,0.00203,local CPU (2 vCPU)

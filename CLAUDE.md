@@ -59,16 +59,18 @@ docs/              plan, architecture diagram, write-ups
 ## Current status
 - [ ] Phase 0 — repo done; AWS account setup pending (see docs/DEPLOY.md section 0)
 - [x] Phase 1 — data cleaned (1.62M narratives), bpe-8k tokenizer, token files (149M train tokens). S3 upload happens via `cdk deploy`.
-- [x] Phase 2 — GPT from scratch + tests; CPU demo model trained (runs/cpu_demo). Full 14M-param run: notebooks/kaggle_train.ipynb (not yet run)
-- [x] Phase 3 — KV cache, sampling, ONNX export with cache in graph, INT8; benchmarks in benchmarks/results/
+- [x] Phase 2 — GPT from scratch + tests. Full run done on Kaggle T4 (2026-11-04): 13.9M params, 163.8M tokens, 44 min, val ppl 15.7; 5 ablations. Checkpoint: runs/kaggle_t4/ (not in git); logs in benchmarks/results/training/
+- [x] Phase 3 — KV cache, sampling, ONNX export with cache in graph, INT8 (11.3x faster than PyTorch baseline, ppl +0.5%); benchmarks in benchmarks/results/
 - [x] Phase 4 — Lambda handler + zip build (tested on Python 3.12), CDK stack. Not yet deployed.
 - [x] Phase 5 — EC2 user-data for llama.cpp + Qwen2.5-0.5B (Q4_K_M/Q8_0). Not yet deployed.
 - [x] Phase 6 — Locust load tests (local results), EMF metrics + dashboard in CDK, cost model
 - [x] Phase 7 — CDK, GitHub Actions CI + OIDC deploy workflow, README, web GUI
-- Next for Sahil: AWS account (Phase 0), Kaggle full run, `cdk deploy`, AWS benchmarks, teardown.
+- Portfolio framing: AWS is NOT claimed on the resume for this project (Lambda-ready, not deployed); AWS goes to the next project. Optional: Hugging Face Space for a live demo.
 - AWS account creation date: _fill in_ (free plan ends 6 months after this)
 
 ## Decisions log
+- 2026-11-04: Trainer uses bf16 only with native support (compute capability >= 8.0); on a T4 torch reports emulated bf16 as supported, which is slow, so fp16 + GradScaler is used.
+- 2026-11-04: Kaggle full run replaced the CPU demo as the main model everywhere (README, GUI, benchmarks).
 - 2026-11-02: Built everything in one pass at Sahil's request (portfolio deadline). Demo model trained on CPU (4L/4H/256, ctx 128) on a 30M-token sample; benchmark numbers are from a 2-vCPU machine and labelled as local. Lambda uses ONNX Runtime + numpy only (zip, no container), x86_64, 2 GB. KV cache is exported inside the ONNX graph.
 - 2026-11-01: Tokenizer vocab 8,192 (16k only 2.5% fewer tokens, 2x embedding params). Token files are flat uint16 streams with <|endoftext|> (id 0) after each narrative.
 - 2026-11-01: Lowercase all narratives (pre-2021 data is ALL CAPS). Mask phone/email/URL/VIN with placeholder tokens. Hash-based 90/5/5 split after dedup.
