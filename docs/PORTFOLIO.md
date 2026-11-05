@@ -11,7 +11,7 @@
   quantization, speeding up CPU generation 11.3x (53 → 606 tokens/s; 64 tokens in 105 ms vs
   1.19 s) and cutting memory 3.1x (676 → 220 MB) at a 0.5% perplexity cost.
 - Served the INT8 model through a FastAPI API with token streaming and a web UI; load-tested
-  with Locust (13.1 req/s peak, 120 ms single-user p50 latency on 2 vCPUs), backed by 55 unit
+  with Locust (13.1 req/s peak, 120 ms single-user p50 latency on 2 vCPUs), backed by 56 unit
   and integration tests in GitHub Actions CI.
 
 ## Interview talking points

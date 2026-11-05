@@ -128,6 +128,8 @@
   .spec th { width: 42%; font-weight: 600; color: var(--ink-soft); }
   .spec td { font-variant-numeric: tabular-nums; }
   .note { max-width: 72ch; color: var(--ink-soft); font-size: 15px; }
+  footer { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--ink-soft); }
+  footer a { color: var(--ink); }
 
   .charts { margin-top: 26px; display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 22px; }
   .charts figure { margin: 0; background: var(--sheet); border: 1.5px solid var(--ink); padding: 14px; }
@@ -233,6 +235,7 @@
         the same code path the AWS Lambda handler uses.</p>
     </div>
   </main>
+  <footer>Code, training logs and benchmarks: <a href="https://github.com/Sahil4504/forgegpt">github.com/Sahil4504/forgegpt</a></footer>
 </div>
 
 <script>
@@ -240,7 +243,8 @@ const $ = (id) => document.getElementById(id);
 const CAPTIONS = {
   "tokenizer_comparison.png": "Our 8k tokenizer encodes complaints as compactly as GPT-2's 50k vocabulary.",
   "allcaps_by_year.png": "Why everything is lowercased: complaints were all caps until 2021.",
-  "training_curves.png": "Training and validation loss of the demo run.",
+  "training_curves.png": "Training and validation loss of the full run on a Kaggle T4.",
+  "ablations.png": "Ablations: what changing depth, context and learning rate did.",
   "attention_heads.png": "What different attention heads look at in one complaint.",
   "kv_cache_scaling.png": "Time per generated token, with and without the KV cache.",
   "inference_variants.png": "CPU speed and size: PyTorch vs ONNX Runtime, FP32 vs INT8.",

@@ -25,6 +25,8 @@ serve = ["onnxruntime", "fastapi", "uvicorn[standard]"]
 # Benchmarks and charts.
 bench = ["matplotlib", "psutil", "locust", "tabulate", "requests"]
 dev = ["pytest", "ruff", "httpx"]
+# Publishing the demo to a Hugging Face Space (scripts/build_hf_space.py --push).
+space = ["huggingface_hub"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/forgegpt"]

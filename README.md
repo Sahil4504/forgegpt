@@ -32,7 +32,7 @@ streaming API and web GUI, and benchmarked for quality, latency, throughput and 
 | Optimization | ONNX export with the KV cache inside the graph, dynamic INT8 quantization | `src/forgegpt/onnx_export.py` |
 | Serving | FastAPI + web GUI with token streaming; Lambda handler (ONNX Runtime + numpy only) | `serving/` |
 | Deployment (ready, not deployed) | AWS CDK: S3, Lambda + Function URL, optional EC2 llama.cpp baseline, dashboard | `infra/`, `serving/ec2/` |
-| Quality | 55 unit and integration tests, ruff, GitHub Actions CI | `tests/`, `.github/` |
+| Quality | 56 unit and integration tests, ruff, GitHub Actions CI | `tests/`, `.github/` |
 
 ## Results
 
@@ -191,6 +191,13 @@ BPE tokenizer split the prompt and the output.
 |---|---|
 | ![Tokens](docs/images/gui_tokens_dark.png) | ![Model](docs/images/gui_model.png) |
 
+**In-browser build.** `serving/browser/` is the same page with no server at all: it downloads
+the 17.3 MB INT8 model and runs it with ONNX Runtime Web (WebAssembly). The byte-level BPE
+tokenizer, sampling and KV-cached generation loop are ported to JavaScript (`forgegpt.js`); the
+port produces token-for-token the same ids as the Python tokenizer on 3,013 validation
+narratives, and the same greedy completions as ONNX Runtime in Python. `scripts/build_hf_space.py`
+packages it as a free static Hugging Face Space.
+
 ## Reproduce
 
 ```bash
@@ -214,7 +221,7 @@ python scripts/run_load_test.py --host http://localhost:8000
 python scripts/cost_model.py
 python scripts/make_charts.py
 
-pytest                                                   # 55 tests
+pytest                                                   # 56 tests
 ```
 
 Deploying to AWS (Free plan): [docs/DEPLOY.md](docs/DEPLOY.md).
